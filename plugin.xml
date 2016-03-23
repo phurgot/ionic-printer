@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        id="de.appplant.cordova.plugin.printer"
+        id="de.appplant.ionic.plugin.printer"
         version="0.7.1">
 
     <name>Printer</name>
@@ -17,7 +16,7 @@
     </repo>
 
     <keywords>
-        print, printer, ios, android, google cloud, air print
+        print, printer, ios, google cloud, air print
     </keywords>
 
     <license>Apache 2.0</license>
@@ -48,14 +47,4 @@
 
     </platform>
 
-    <!-- android -->
-    <platform name="android">
-        <config-file target="res/xml/config.xml" parent="/*">
-            <feature name="Printer">
-                <param name="android-package" value="de.appplant.cordova.plugin.printer.Printer"/>
-            </feature>
-        </config-file>
-
-        <source-file src="src/android/Printer.java" target-dir="src/de/appplant/cordova/plugin/printer" />
-    </platform>
 </plugin>
