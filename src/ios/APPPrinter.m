@@ -27,7 +27,7 @@
 @property (retain) NSString* callbackId;
 @property (retain) NSString* printerId;
 @property (retain) NSURL *printerURL;
-@property (strong, nonatomic) NSMutableArray *printersArray
+@property (strong, nonatomic) NSMutableArray *printersArray;
 @end
 
 
