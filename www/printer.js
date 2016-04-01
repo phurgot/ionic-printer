@@ -63,6 +63,18 @@ exports.settingsButtonPressed = function (callback, scope) {
 };
 
 /**
+ * Clear array of printers
+ *
+ * @param callback
+ * @param scope
+ */
+exports.resetChosenPrintersArray = function (callback, scope) {
+    var fn = this._createCallbackFn(callback);
+
+    exec(fn, null, 'Printer', 'resetChosenPrintersArray', []);
+};
+
+/**
  * Sends the content to the Google Cloud Print service.
  *
  * @param {String} content

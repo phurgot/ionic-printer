@@ -1,6 +1,6 @@
 /*
  Copyright 2013-2014 appPlant UG
-
+ 
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
  distributed with this work for additional information
@@ -8,9 +8,9 @@
  to you under the Apache License, Version 2.0 (the
  "License"); you may not use this file except in compliance
  with the License.  You may obtain a copy of the License at
-
+ 
  http://www.apache.org/licenses/LICENSE-2.0
-
+ 
  Unless required by applicable law or agreed to in writing,
  software distributed under the License is distributed on an
  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,13 +27,19 @@
 @property (retain) NSString* callbackId;
 @property (retain) NSString* printerId;
 @property (retain) NSURL *printerURL;
-
+@property (strong, nonatomic) NSMutableArray *printersArray
 @end
 
 
 @implementation APPPrinter
 
-
+-(instancetype) init {
+self = [super init];
+if (self) {
+    self.printersArray = [NSMutableArray new];
+}
+return self;
+}
 /*
  * Checks if the printing service is available.
  *
@@ -45,10 +51,10 @@
     [self.commandDelegate runInBackground:^{
         CDVPluginResult* pluginResult;
         BOOL isAvailable = [self isPrintingAvailable];
-
+        
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                            messageAsBool:isAvailable];
-
+        
         [self.commandDelegate sendPluginResult:pluginResult
                                     callbackId:command.callbackId];
     }];
@@ -65,26 +71,26 @@
     if (!self.isPrintingAvailable) {
         return;
     }
-
+    
     _callbackId = command.callbackId;
-
+    
     NSArray*  arguments           = [command arguments];
     NSString* content             = [arguments objectAtIndex:0];
     NSMutableDictionary* settings = [arguments objectAtIndex:1];
-
+    
     UIPrintInteractionController* controller = [self printController];
-
+    
     NSString* printerId = [settings objectForKey:@"printerId"];
-
+    
     [self adjustPrintController:controller withSettings:settings];
     [self loadContent:content intoPrintController:controller];
-
+    
     if (printerId) {
         [self sendToPrinter:controller];
     }
     else {
         CGRect rect = [self convertIntoRect:[settings objectForKey:@"bounds"]];
-
+        
         [self presentPrintController:controller fromRect:rect];
     }
 }
@@ -101,6 +107,8 @@
         return;
     }
     
+    //    for (UIPrinter *printer in self.printersArray) {
+    
     _callbackId = command.callbackId;
     
     NSArray*  arguments           = [command arguments];
@@ -110,7 +118,7 @@
     UIPrintInteractionController* controller = [UIPrintInteractionController sharedPrintController];
     
     [self adjustPrintController:controller withSettings:settings];
-//    [self loadContent:content intoPrintController:controller];
+    //    [self loadContent:content intoPrintController:controller];
     UIMarkupTextPrintFormatter *htmlFormatter = [[UIMarkupTextPrintFormatter alloc]
                                                  initWithMarkupText:content];
     htmlFormatter.startPage = 0;
@@ -122,9 +130,9 @@
         [self sendToPrinter:controller];
     }
     else {
-//        CGRect rect = [self convertIntoRect:[settings objectForKey:@"bounds"]];
-//        
-//        [self presentPrintController:controller fromRect:rect];
+        //        CGRect rect = [self convertIntoRect:[settings objectForKey:@"bounds"]];
+        //
+        //        [self presentPrintController:controller fromRect:rect];
         CGRect rect = CGRectMake(0, 50, 0, 0);
         UIPrinterPickerController *printPicker = [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:nil];
         [printPicker presentFromRect:rect inView:self.webView animated:YES completionHandler:
@@ -139,7 +147,7 @@
                  [self sendToPrinter:controller];
              }
          }];
-
+        
     }
     controller = nil;
 }
@@ -169,31 +177,31 @@
     UIPrintInfo* printInfo             = [UIPrintInfo printInfo];
     UIPrintInfoOrientation orientation = UIPrintInfoOrientationPortrait;
     UIPrintInfoOutputType outputType   = UIPrintInfoOutputGeneral;
-
+    
     if ([[settings objectForKey:@"landscape"] boolValue]) {
         orientation = UIPrintInfoOrientationLandscape;
     }
-
+    
     if ([[settings objectForKey:@"graystyle"] boolValue]) {
         outputType = UIPrintInfoOutputGrayscale;
     }
-
+    
     printInfo.outputType  = outputType;
     printInfo.orientation = orientation;
     printInfo.jobName     = [settings objectForKey:@"name"];
     printInfo.duplex      = [[settings objectForKey:@"duplex"] boolValue];
-
+    
     controller.printInfo      = printInfo;
     controller.showsPageRange = YES;
-
+    
     return controller;
 }
 
 
 - (void) settingsButtonPressed:(CDVInvokedUrlCommand*)command
 {
-//    UIPrinterPickerController *picker = [UIPrinterPickerController
-//                                         printerPickerControllerWithInitiallySelectedPrinter:[self printController]];
+    //    UIPrinterPickerController *picker = [UIPrinterPickerController
+    //                                         printerPickerControllerWithInitiallySelectedPrinter:[self printController]];
     CGRect rect = CGRectMake(0, 50, 0, 0);
     UIPrinterPickerController *printPicker = [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:nil];
     [printPicker presentFromRect:rect inView:self.webView animated:YES completionHandler:
@@ -210,17 +218,22 @@
              
              NSLog(@"%@",printerPicker.selectedPrinter.displayName);
              NSLog(@"%@",printerPicker);
-             self.printer = printerPicker.selectedPrinter;
-//             NSURL *printerURL = printerPicker.selectedPrinter.URL;
-//             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-//             [defaults setObject:[printerURL absoluteString] forKey:@"yourKey"];
-//             [defaults synchronize];
+             
+             //===================================================================
+             //self.printer = printerPicker.selectedPrinter;
+             [self.printersArray addObject:printerPicker.selectedPrinter];
+             //===================================================================
+             
+             
+             //             NSURL *printerURL = printerPicker.selectedPrinter.URL;
+             //             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+             //             [defaults setObject:[printerURL absoluteString] forKey:@"yourKey"];
+             //             [defaults synchronize];
              
          }
      }];
-
-
 }
+
 /**
  * Adjusts the web view and page renderer.
  */
@@ -230,11 +243,11 @@
     UIViewPrintFormatter* formatter = [page viewPrintFormatter];
     // margin not required - done in web page
     formatter.contentInsets = UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f);
-
+    
     renderer.headerHeight = -30.0f;
     renderer.footerHeight = -30.0f;
     [renderer addPrintFormatter:formatter startingAtPageAtIndex:0];
-
+    
     page.scalesPageToFit        = YES;
     page.dataDetectorTypes      = UIDataDetectorTypeNone;
     page.userInteractionEnabled = NO;
@@ -254,12 +267,12 @@
 {
     UIWebView* page               = [[UIWebView alloc] init];
     UIPrintPageRenderer* renderer = [[UIPrintPageRenderer alloc] init];
-
+    
     [self adjustWebView:page andPrintPageRenderer:renderer];
-
+    
     if ([NSURL URLWithString:content]) {
         NSURL *url = [NSURL URLWithString:content];
-
+        
         [page loadRequest:[NSURLRequest requestWithURL:url]];
     }
     else {
@@ -267,11 +280,11 @@
         NSString* wwwFilePath = [[NSBundle mainBundle] pathForResource:@"www"
                                                                 ofType:nil];
         NSURL* baseURL        = [NSURL fileURLWithPath:wwwFilePath];
-
-
+        
+        
         [page loadHTMLString:content baseURL:baseURL];
     }
-
+    
     controller.printPageRenderer = renderer;
 }
 
@@ -285,18 +298,18 @@
 - (void) presentPrintController:(UIPrintInteractionController*)controller
                        fromRect:(CGRect)rect
 {
-//    if(CDV_IsIPad()) {
-        [controller presentFromRect:rect inView:self.webView animated:YES completionHandler:
-         ^(UIPrintInteractionController *ctrl, BOOL ok, NSError *e) {
-             _printerId = ctrl.printInfo.printerID;
-             NSLog(@"%@, %@", _printerId, ctrl.printInfo);
-             CDVPluginResult* pluginResult =
-             [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsString:_printerId];
+    //    if(CDV_IsIPad()) {
+    [controller presentFromRect:rect inView:self.webView animated:YES completionHandler:
+     ^(UIPrintInteractionController *ctrl, BOOL ok, NSError *e) {
+         _printerId = ctrl.printInfo.printerID;
+         NSLog(@"%@, %@", _printerId, ctrl.printInfo);
+         CDVPluginResult* pluginResult =
+         [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsString:_printerId];
 
-             [self.commandDelegate sendPluginResult:pluginResult
-                                         callbackId:_callbackId];
-         }];
-    }
+         [self.commandDelegate sendPluginResult:pluginResult
+                                     callbackId:_callbackId];
+     }];
+}
 //    else {
 //        [controller presentAnimated:YES completionHandler:
 //         ^(UIPrintInteractionController *ctrl, BOOL ok, NSError *e) {
@@ -321,52 +334,54 @@
 - (void) sendToPrinter:(UIPrintInteractionController*)controller
 {
     
-//    UIPrinter* printer = [UIPrinter printerWithURL:self.printer.URL];
-//    NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
-//    UIPrinter *currentPrinterObj = [UIPrinter printerWithURL:[NSURL URLWithString:[userDefault stringForKey:@"yourKey"]]];
-    [self.printer contactPrinter:^(BOOL available) {
-        if(available){
-            NSLog(@"%d", available);
-            [controller printToPrinter: self.printer completionHandler:
-             ^(UIPrintInteractionController *ctrl, BOOL ok, NSError *e) {
-                 CDVPluginResult* pluginResult =
-                 [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-                 
-                 [self.commandDelegate sendPluginResult:pluginResult
-                                             callbackId:_callbackId];
-             }];
-        }
-    }];
+    //    UIPrinter* printer = [UIPrinter printerWithURL:self.printer.URL];
+    //    NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
+    //    UIPrinter *currentPrinterObj = [UIPrinter printerWithURL:[NSURL URLWithString:[userDefault stringForKey:@"yourKey"]]];
+    for (UIPrinter *printer in self.printersArray) {
+        [printer contactPrinter:^(BOOL available) {
+            if(available){
+                NSLog(@"%d", available);
+                [controller printToPrinter:printer completionHandler:
+                 ^(UIPrintInteractionController *ctrl, BOOL ok, NSError *e) {
+                     CDVPluginResult* pluginResult =
+                     [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+                     
+                     [self.commandDelegate sendPluginResult:pluginResult
+                                                 callbackId:_callbackId];
+                 }];
+            }
+        }];
+    }
     
-//    if([UIPrintInteractionController isPrintingAvailable]){
-//        NSLog(@"%@", controller.printPageRenderer.printFormatters);
-//        [controller printToPrinter: self.printer completionHandler: nil];
-//         ^(UIPrintInteractionController *ctrl, BOOL ok, NSError *e) {
-//             NSLog(@"%@", ctrl.printInfo.printerID);
-//             CDVPluginResult* pluginResult =
-//             [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsString:ctrl.printInfo.printerID];
-//
-//             
-//             [self.commandDelegate sendPluginResult:pluginResult
-//                                         callbackId:_callbackId];
-//         }];
-//        
-//        controller = nil;
-//        NSLog(@"%@", controller.printPageRenderer);
-//    }
-//    NSLog(@"%@", printer.displayName);
-//    NSLog(@"%@", printer.URL);
-//    NSLog(@"%@", controller);
-//    NSLog(@"%@", self.printer.displayName);
-//    NSLog(@"%@", self.printer.URL);
-//    [controller printToPrinter: self.printer completionHandler:
-//     ^(UIPrintInteractionController *ctrl, BOOL ok, NSError *e) {
-//         CDVPluginResult* pluginResult =
-//         [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-//
-//         [self.commandDelegate sendPluginResult:pluginResult
-//                                     callbackId:_callbackId];
-//     }];
+    //    if([UIPrintInteractionController isPrintingAvailable]){
+    //        NSLog(@"%@", controller.printPageRenderer.printFormatters);
+    //        [controller printToPrinter: self.printer completionHandler: nil];
+    //         ^(UIPrintInteractionController *ctrl, BOOL ok, NSError *e) {
+    //             NSLog(@"%@", ctrl.printInfo.printerID);
+    //             CDVPluginResult* pluginResult =
+    //             [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsString:ctrl.printInfo.printerID];
+    //
+    //
+    //             [self.commandDelegate sendPluginResult:pluginResult
+    //                                         callbackId:_callbackId];
+    //         }];
+    //
+    //        controller = nil;
+    //        NSLog(@"%@", controller.printPageRenderer);
+    //    }
+    //    NSLog(@"%@", printer.displayName);
+    //    NSLog(@"%@", printer.URL);
+    //    NSLog(@"%@", controller);
+    //    NSLog(@"%@", self.printer.displayName);
+    //    NSLog(@"%@", self.printer.URL);
+    //    [controller printToPrinter: self.printer completionHandler:
+    //     ^(UIPrintInteractionController *ctrl, BOOL ok, NSError *e) {
+    //         CDVPluginResult* pluginResult =
+    //         [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    //
+    //         [self.commandDelegate sendPluginResult:pluginResult
+    //                                     callbackId:_callbackId];
+    //     }];
 }
 
 /**
@@ -394,13 +409,22 @@
 - (BOOL) isPrintingAvailable
 {
     Class controllerCls = NSClassFromString(@"UIPrintInteractionController");
-
+    
     if (!controllerCls) {
         return NO;
     }
-
+    
     return [self printController] && [UIPrintInteractionController
                                       isPrintingAvailable];
+}
+
+/**
+ *
+ *Clear array of chosen printers (serial printing).
+ *
+ **/
+- (void)resetChosenPrintersArray {
+    self.printersArray = [NSMutableArray new];
 }
 
 @end
