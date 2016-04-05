@@ -393,10 +393,10 @@ return self;
 
 /**
  *
- *Clear array of chosen printers (serial printing).
+ * Clear array of chosen printers (serial printing).
  *
  **/
-- (void)resetChosenPrintersArray
+- (void)resetChosenPrintersArray:(CDVInvokedUrlCommand*)command
 {
     self.printersArray = [NSMutableArray new];
 }
