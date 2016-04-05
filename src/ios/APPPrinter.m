@@ -104,7 +104,7 @@ return self;
 - (void) superPrint:(CDVInvokedUrlCommand*)command
 {
     // check whether printer is available and count of selected printers more than 2 items
-    if (!self.isPrintingAvailable || self.printersArray count < 2) {
+    if (!self.isPrintingAvailable || [self.printersArray count] < 2) {
         return;
     }
     
