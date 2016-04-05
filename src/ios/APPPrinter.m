@@ -180,31 +180,37 @@ return self;
 // "(CDVInvokedUrlCommand*)command" - parameter. Object named as "command" with type  CDVInvokedUrlCommand
 - (void) settingsButtonPressed:(CDVInvokedUrlCommand*)command
 {
-    // call method rect of CGRect type
-    CGRect rect = CGRectMake(0, 50, 0, 0);
-    // init print picker
-    UIPrinterPickerController *printPicker = [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:nil];
-    // call method presentFromRect of object printPicker with first param as "rect", second param "inView" as self.webView, third ...
-    [printPicker presentFromRect:rect inView:self.webView animated:YES completionHandler:
-     ^(UIPrinterPickerController *printerPicker, BOOL userDidSelect, NSError *error)
-     {
-         if (userDidSelect)
-         {
-             // User selected the item in the UIPrinterPickerController and got the printer details.
+    [self.commandDelegate runInBackground:^{
+        // call method rect of CGRect type
+        CGRect rect = CGRectMake(0, 50, 0, 0);
+        // init print picker
+        UIPrinterPickerController *printPicker = [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:nil];
+        // call method presentFromRect of object printPicker with first param as "rect", second param "inView" as self.webView, third ...
+        [printPicker presentFromRect:rect inView:self.webView animated:YES completionHandler:
+        ^(UIPrinterPickerController *printerPicker, BOOL userDidSelect, NSError *error)
+        {
+            if (userDidSelect)
+            {
+                // User selected the item in the UIPrinterPickerController and got the printer details.
 
-             [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:printerPicker.selectedPrinter];
-             
-             // Here you will get the printer and printer details.ie,
-             // printerPicker.selectedPrinter, printerPicker.selectedPrinter.displayName, printerPicker.selectedPrinter.URL etc. So you can display the printer name in your label text or button title.
-             
-             NSLog(@"%@",printerPicker.selectedPrinter.displayName);
-             NSLog(@"%@",printerPicker);
-             
-             //===================================================================
-             [self.printersArray addObject:printerPicker.selectedPrinter];
-             //===================================================================
-         }
-     }];
+                [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:printerPicker.selectedPrinter];
+
+                // Here you will get the printer and printer details.ie,
+                // printerPicker.selectedPrinter, printerPicker.selectedPrinter.displayName, printerPicker.selectedPrinter.URL etc. So you can display the printer name in your label text or button title.
+
+                NSLog(@"%@",printerPicker.selectedPrinter.displayName);
+                NSLog(@"%@",printerPicker);
+
+                //===================================================================
+                [self.printersArray addObject:printerPicker.selectedPrinter];
+                //===================================================================
+                // init result response
+                CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:self.printersArray];
+                // send result response
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            }
+        }];
+    }];
 }
 
 /**
@@ -398,7 +404,13 @@ return self;
  **/
 - (void)resetChosenPrintersArray:(CDVInvokedUrlCommand*)command
 {
-    self.printersArray = [NSMutableArray new];
+    [self.commandDelegate runInBackground:^{
+        self.printersArray = [NSMutableArray new];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:self.printersArray];
+        // The sendPluginResult method is thread-safe.
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }];
+
 }
 
 @end
