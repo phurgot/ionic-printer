@@ -56,6 +56,12 @@ exports.isAvailable = function (callback, scope) {
 
     exec(fn, null, 'Printer', 'isAvailable', []);
 };
+/**
+ * Help to select and add printer to array of printers
+ *
+ * @param callback
+ * @param scope
+ */
 exports.settingsButtonPressed = function (callback, scope) {
     var fn = this._createCallbackFn(callback);
 
@@ -110,6 +116,14 @@ exports.print = function (content, options, callback, scope) {
     exec(fn, null, 'Printer', 'print', [page, params]);
 };
 
+/**
+ * Print method
+ *
+ * @param content
+ * @param options
+ * @param callback
+ * @param scope
+ */
 exports.superPrint = function (content, options, callback, scope) {
     var page = content.innerHTML || content,
         params = options || {},

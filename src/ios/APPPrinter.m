@@ -96,18 +96,17 @@ return self;
 }
 
 /**
- * (test) Sends the printing content to the printer controller and opens them.
+ * Sends the printing content to the printer controller and opens them.
  *
  * @param {NSString} content
  *      The (HTML encoded) content
  */
 - (void) superPrint:(CDVInvokedUrlCommand*)command
 {
-    if (!self.isPrintingAvailable) {
+    // check whether printer is available and count of selected printers more than 2 items
+    if (!self.isPrintingAvailable || self.printersArray count < 2) {
         return;
     }
-    
-    //    for (UIPrinter *printer in self.printersArray) {
     
     _callbackId = command.callbackId;
     
@@ -118,37 +117,15 @@ return self;
     UIPrintInteractionController* controller = [UIPrintInteractionController sharedPrintController];
     
     [self adjustPrintController:controller withSettings:settings];
-    //    [self loadContent:content intoPrintController:controller];
     UIMarkupTextPrintFormatter *htmlFormatter = [[UIMarkupTextPrintFormatter alloc]
                                                  initWithMarkupText:content];
     htmlFormatter.startPage = 0;
     htmlFormatter.contentInsets = UIEdgeInsetsMake(0.0, 0.0, 0.0, 0.0); // 1 inch margins
     controller.printFormatter = htmlFormatter;
     
-    if (self.printer) {
-        NSLog(@"%@", controller.printPageRenderer );
-        [self sendToPrinter:controller];
-    }
-    else {
-        //        CGRect rect = [self convertIntoRect:[settings objectForKey:@"bounds"]];
-        //
-        //        [self presentPrintController:controller fromRect:rect];
-        CGRect rect = CGRectMake(0, 50, 0, 0);
-        UIPrinterPickerController *printPicker = [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:nil];
-        [printPicker presentFromRect:rect inView:self.webView animated:YES completionHandler:
-         ^(UIPrinterPickerController *printerPicker, BOOL userDidSelect, NSError *error)
-         {
-             if (userDidSelect)
-             {
-                 [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:printerPicker.selectedPrinter];
-                 
-                 self.printer = printerPicker.selectedPrinter;
-                 
-                 [self sendToPrinter:controller];
-             }
-         }];
-        
-    }
+    NSLog(@"%@", controller.printPageRenderer );
+    [self sendToPrinter:controller];
+
     controller = nil;
 }
 
@@ -197,39 +174,35 @@ return self;
     return controller;
 }
 
-
+// "-" start declaration of method
+// "(void)" - type of return value
+// "settingsButtonPressed" - method's name
+// "(CDVInvokedUrlCommand*)command" - parameter. Object named as "command" with type  CDVInvokedUrlCommand
 - (void) settingsButtonPressed:(CDVInvokedUrlCommand*)command
 {
-    //    UIPrinterPickerController *picker = [UIPrinterPickerController
-    //                                         printerPickerControllerWithInitiallySelectedPrinter:[self printController]];
+    // call method rect of CGRect type
     CGRect rect = CGRectMake(0, 50, 0, 0);
+    // init print picker
     UIPrinterPickerController *printPicker = [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:nil];
+    // call method presentFromRect of object printPicker with first param as "rect", second param "inView" as self.webView, third ...
     [printPicker presentFromRect:rect inView:self.webView animated:YES completionHandler:
      ^(UIPrinterPickerController *printerPicker, BOOL userDidSelect, NSError *error)
      {
          if (userDidSelect)
          {
-             //User selected the item in the UIPrinterPickerController and got the printer details.
-             
+             // User selected the item in the UIPrinterPickerController and got the printer details.
+
              [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:printerPicker.selectedPrinter];
              
-             //Here you will get the printer and printer details.ie,
+             // Here you will get the printer and printer details.ie,
              // printerPicker.selectedPrinter, printerPicker.selectedPrinter.displayName, printerPicker.selectedPrinter.URL etc. So you can display the printer name in your label text or button title.
              
              NSLog(@"%@",printerPicker.selectedPrinter.displayName);
              NSLog(@"%@",printerPicker);
              
              //===================================================================
-             //self.printer = printerPicker.selectedPrinter;
              [self.printersArray addObject:printerPicker.selectedPrinter];
              //===================================================================
-             
-             
-             //             NSURL *printerURL = printerPicker.selectedPrinter.URL;
-             //             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-             //             [defaults setObject:[printerURL absoluteString] forKey:@"yourKey"];
-             //             [defaults synchronize];
-             
          }
      }];
 }

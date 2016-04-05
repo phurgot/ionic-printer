@@ -31,6 +31,7 @@
 - (void) superPrint:(CDVInvokedUrlCommand*)command;
 // Find out whether printing is supported on this platform
 - (void) isAvailable:(CDVInvokedUrlCommand*)command;
-@property (strong, nonatomic) UIPrinter *printer;
+// Help to select and add printer to array of printers
+- (void) settingsButtonPressed:(CDVInvokedUrlCommand*)command;
 
 @end
