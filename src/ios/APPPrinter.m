@@ -396,7 +396,8 @@ return self;
  *Clear array of chosen printers (serial printing).
  *
  **/
-- (void)resetChosenPrintersArray {
+- (void)resetChosenPrintersArray
+{
     self.printersArray = [NSMutableArray new];
 }
 

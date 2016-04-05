@@ -33,5 +33,7 @@
 - (void) isAvailable:(CDVInvokedUrlCommand*)command;
 // Help to select and add printer to array of printers
 - (void) settingsButtonPressed:(CDVInvokedUrlCommand*)command;
+// Clear array of printers
+- (void) resetChosenPrintersArray;
 
 @end
