@@ -33,12 +33,15 @@
 
 @implementation APPPrinter
 
--(instancetype) init {
-self = [super init];
-if (self) {
-    self.printersArray = [NSMutableArray new];
-}
-return self;
+/**
+* Method of attribute
+*
+**/
+- (NSMutableArray *)printersArray {
+    if (!_printersArray) {
+        _printersArray = [NSMutableArray new];
+    }
+    return _printersArray;
 }
 /*
  * Checks if the printing service is available.
