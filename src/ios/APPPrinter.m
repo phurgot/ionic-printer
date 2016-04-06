@@ -205,7 +205,7 @@
                 NSLog(@"%@",printerPicker);
 
                 //===================================================================
-                [self.printersArray addObject:printerPicker.selectedPrinter];
+                [self.printersArray addObject:printerPicker.selectedPrinter.displayName];
                 //===================================================================
                 // init result response
                 CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:self.printersArray];
