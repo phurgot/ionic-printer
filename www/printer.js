@@ -121,10 +121,11 @@ exports.print = function (content, options, callback, scope) {
  *
  * @param content
  * @param options
+ * @param printerIndex
  * @param callback
  * @param scope
  */
-exports.superPrint = function (content, options, callback, scope) {
+exports.superPrint = function (content, options, printerIndex, callback, scope) {
     var page = content.innerHTML || content,
         params = options || {},
         fn = this._createCallbackFn(callback);
@@ -144,7 +145,7 @@ exports.superPrint = function (content, options, callback, scope) {
         params.name = this.DEFAULT_DOC_NAME;
     }
 
-    exec(fn, null, 'Printer', 'superPrint', [page, params]);
+    exec(fn, null, 'Printer', 'superPrint', [page, params, printerIndex]);
 };
 
 /**
